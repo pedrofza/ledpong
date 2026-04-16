@@ -1,0 +1,56 @@
+#include <zephyr/dt-bindings/led/led.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <zephyr/dt-bindings/pinctrl/rpi-pico-rp2040-pinctrl.h>
+
+&pinctrl {
+    ws2812_pio0_default: ws2812_pio0_default {
+        ws2812 {
+            pinmux = <PIO0_P19>;
+        };
+    };
+};
+
+&pio0 {
+    status = "okay";
+
+    pio-ws2812 {
+        compatible = "worldsemi,ws2812-rpi_pico-pio";
+        status = "okay";
+        pinctrl-0 = <&ws2812_pio0_default>;
+        pinctrl-names = "default";
+        bit-waveform = <3>, <3>, <4>;
+        led_strip_in_pio: ws2812 {
+            status = "okay";
+            gpios = <&gpio0 19 GPIO_ACTIVE_HIGH>;
+            chain-length = <144>;
+            color-mapping = <LED_COLOR_ID_GREEN LED_COLOR_ID_RED LED_COLOR_ID_BLUE>;
+            reset-delay = <200>;
+            frequency = <DT_FREQ_K(800)>;
+        };
+    };
+};
+
+/ {
+    buttons: buttons {
+        compatible = "gpio-keys";
+
+        button0: button_0 {
+            gpios = <&gpio0 2 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+            label = "B0";
+            zephyr,code = <INPUT_KEY_0>;
+        };
+
+        button1: button_1 {
+            gpios = <&gpio0 3 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+            label = "B1";
+            zephyr,code = <INPUT_KEY_1>;
+        };
+    };
+};
+
+/ {
+    aliases {
+        led-strip = &led_strip_in_pio;
+		player-keys = &buttons;
+    };
+};
